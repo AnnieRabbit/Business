@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('投诉退费列表')" />
+    <th:block th:include="include :: datetimepicker-css" />
+
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>客户号码：</label>
+                                <input type="text" name="customerNum"/>
+                            </li>
+                            <li>
+                                <label>投诉类型：</label>
+                                <select name="returnType" th:with="type=${@dict.getType('business_return_type')}">
+                                    <option value="">请选择投诉类型:</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <label>发展人：</label>
+                                <input type="text" name="businessUser.developeNum"/>
+                            </li>
+                        </ul>
+                            <li >
+                                <label style="display:inline-block;width:100px;text-align:left">予以退费年月：</label>
+                                <input type="text" name="returnDate" id="returnDate" placeholder="yyyy-MM"  class="form-control" style="display:inline-block;"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="business:businessReturn:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="business:businessReturn:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="business:businessReturn:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning"  id="export" shiro:hasPermission="business:businessReturn:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+     <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+
+        var editFlag = [[${@permission.hasPermi('business:businessReturn:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:businessReturn:remove')}]];
+        var returnTypeDatas = [[${@dict.getType('business_return_type')}]];
+        var prefix = ctx + "business/businessReturn";
+        $("#returnDate").datetimepicker({
+            format: 'yyyy-mm',
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            startView: 'year',
+            minView:'year',
+            maxView:'year'
+
+        });
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "投诉退费",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'id',
+                    title: '自增id',
+                    visible: false
+                },
+                {
+                    field: 'customerNum',
+                    title: '客户号码'
+                },
+                {
+                    field: 'productId',
+                    title: '产品ID'
+                },
+                {
+                    field: 'businessUser.productName',
+                    title: '产品名称'
+                },
+                    {
+                        field: 'orderTime',
+                        title: '订购时间',
+                        formatter:function(value,row,index){
+                            if(value!=null){
+                                var date = new Date(value);
+                                var getMonth = (date.getMonth()+1)<10?("0"+(date.getMonth()+1)):(date.getMonth()+1);
+                                var getDate = date.getDate()<10?("0"+date.getDate()):date.getDate();
+                                // var getHours = date.getHours()<10?("0"+date.getHours()):date.getHours();
+                                // var getMinutes = date.getMinutes()<10?("0"+date.getMinutes()):date.getMinutes();
+                                // var getSeconds = date.getSeconds()<10?("0"+date.getSeconds()):date.getSeconds();
+                                return date.getFullYear()+"-"+getMonth+"-"+getDate+" ";
+                            }
+                        }
+                    },
+                {
+                    field: 'businessUser.membership',
+                    title: '所属集团'
+                },
+                {
+                    field: 'businessUser.developeNum',
+                    title: '发展人'
+                },
+                {
+                    field: 'returnType',
+                    title: '投诉类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(returnTypeDatas, value);
+                    }
+                },
+                {
+                    field: 'returnDate',
+                    title: '予以退费年月'
+                },
+                {
+                    field: 'returnAssets',
+                    title: '退费金额'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+       $("#export").click(function () {
+           window.location = prefix+"/export";
+       })
+        });
+    </script>
+
+</body>
+</html>

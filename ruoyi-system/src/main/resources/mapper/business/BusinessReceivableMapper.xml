@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.BusinessReceivableMapper">
+    
+    <resultMap type="BusinessReceivable" id="BusinessReceivableResult">
+        <result property="id"    column="id"    />
+        <result property="customerNum"    column="customer_num"    />
+        <result property="billDate"    column="bill_date"    />
+        <result property="orderTime"    column="order_time"    />
+<!--        <result property="receivableAssets"    column="receivable_assets"    />-->
+        <result property="productId"    column="product_id"    />
+        <association property="businessUser" javaType="BusinessUser">
+            <result  property="developeNum" column="develope_num"/>
+            <result  property="productName" column="product_name"/>
+            <result property="membership" column="membership"  />
+            <result property="productAssets" column="product_assets"  />
+        </association>
+    </resultMap>
+
+    <sql id="selectBusinessReceivableVo">
+<!--        select id, customer_num, bill_date, receivable_assets, product_id,order_time from business_receivable-->
+        select b.id, b.customer_num, bill_date, a.product_assets, b.product_id, b.order_time,a.develope_num,a.product_name,a.membership from business_receivable b
+        left join business_user a on b.customer_num=a.customer_num  and a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </sql>
+
+    <select id="selectBusinessReceivableList" parameterType="BusinessReceivable" resultMap="BusinessReceivableResult">
+        select b.id, b.customer_num, bill_date, a.product_assets, b.product_id, b.order_time,a.develope_num,a.product_name,a.membership from business_receivable b
+        left join business_user a on b.customer_num=a.customer_num
+        <where>  
+            <if test="customerNum != null  and customerNum != ''"> and b.customer_num = #{customerNum}</if>
+            <if test="billDate != null "> and bill_date = #{billDate}</if>
+            <if test="productId != null  and productId != ''"> and b.product_id = #{productId}</if>
+            <if test="orderTime != null "> and b.order_time = #{orderTime}</if>
+            <if test="businessUser.developeNum != null  and businessUser.developeNum != ''"> and a.develope_num = #{businessUser.developeNum}</if>
+        </where>
+        and a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </select>
+    
+    <select id="selectBusinessReceivableById" parameterType="Long" resultMap="BusinessReceivableResult">
+        <include refid="selectBusinessReceivableVo"/>
+        where b.id = #{id}
+    </select>
+        
+    <insert id="insertBusinessReceivable" parameterType="BusinessReceivable" useGeneratedKeys="true" keyProperty="id">
+        insert into business_receivable
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerNum != null">customer_num,</if>
+            <if test="billDate != null">bill_date,</if>
+<!--            <if test="receivableAssets != null">receivable_assets,</if>-->
+            <if test="productId != null">product_id,</if>
+            <if test="orderTime != null">order_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerNum != null">#{customerNum},</if>
+            <if test="billDate != null">#{billDate},</if>
+<!--            <if test="receivableAssets != null">#{receivableAssets},</if>-->
+            <if test="productId != null">#{productId},</if>
+            <if test="orderTime != null">#{orderTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBusinessReceivable" parameterType="BusinessReceivable">
+        update business_receivable
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerNum != null">customer_num = #{customerNum},</if>
+            <if test="billDate != null">bill_date = #{billDate},</if>
+<!--            <if test="receivableAssets != null">receivable_assets = #{receivableAssets},</if>-->
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="orderTime != null">order_time = #{orderTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBusinessReceivableById" parameterType="Long">
+        delete from business_receivable where id = #{id}
+    </delete>
+
+    <delete id="deleteBusinessReceivableByIds" parameterType="String">
+        delete from business_receivable where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectExportBusinessReceivableList" parameterType="BusinessReceivable" resultMap="BusinessReceivableResult">
+        select b.id, b.customer_num, bill_date, a.product_assets, b.product_id, b.order_time,a.develope_num,a.product_name,a.membership from business_receivable b
+        left join business_user a on b.customer_num=a.customer_num where a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </select>
+
+    <!--    是否已存在此应收账单(查询条件:客户手机,产品,订购时间,账单时间)-->
+    <select id="selectBusinessReceivableIfExists" resultType="integer">
+        select count(0) from business_receivable
+        where customer_num = #{customerNum} and product_id= #{productId} and order_time= #{orderTime} and bill_date=#{billDate}
+    </select>
+
+
+    <!--    是否已存在此此客户订单的应收账单数(查询条件:客户手机,产品,订购时间)-->
+    <select id="selectCountsBusinessReceivable" resultType="integer">
+        select count(0) from business_receivable
+        where customer_num = #{customerNum} and product_id= #{productId} and order_time= #{orderTime}
+    </select>
+</mapper>

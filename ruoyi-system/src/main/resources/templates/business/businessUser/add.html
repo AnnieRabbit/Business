@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增用户')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-businessUser-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">客户号码：</label>
+                <div class="col-sm-8">
+                        <input name="customerNum"  class="form-control" type="text" required >
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">省份：</label>
+                <div class="col-sm-8">
+                    <input name="province" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label ">所属集团：</label>
+                <div class="col-sm-8">
+                    <input name="membership" class="form-control" type="text" >
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">产品ID：</label>
+                <div class="col-sm-8">
+                    <input name="productId" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">产品名称：</label>
+                <div class="col-sm-8">
+                    <input name="productName" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">所属CP：</label>
+                <div class="col-sm-8">
+                    <input name="belongCp" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">发展人：</label>
+                <div class="col-sm-8">
+                    <input name="developeNum" class="form-control" type="text" required>
+                </div>
+            </div>
+<!--            <div class="form-group">    -->
+<!--                <label class="col-sm-3 control-label">发展人姓名：</label>-->
+<!--                <div class="col-sm-8">-->
+<!--                    <input name="developePerson" class="form-control" type="text">-->
+<!--                </div>-->
+<!--            </div>-->
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">订购时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group date">
+                        <input name="orderTime" class="form-control" placeholder="yyyy-MM-dd" type="text" required>
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">话单时间：</label>
+                <div class="col-sm-8">
+                    <div class="input-group date">
+                        <input name="callTime" class="form-control" placeholder="yyyy-MM-dd" type="text" required>
+                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">产品金额：</label>
+                <div class="col-sm-8">
+                    <input name="productAssets" class="form-control" type="text" required>
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label is-required">返点比例：</label>
+                <div class="col-sm-8">
+                    <input name="productRate" class="form-control" type="text" required>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var prefix = ctx + "business/businessUser"
+        var icon = "<i class='fa fa-times-circle'></i> ";
+        $("#form-businessUser-add").validate({
+            focusCleanup: true,
+            rules: {
+                customerNum: {
+                    required: true,
+                    isPhone:true,
+                },
+                productAssets: {
+                    required: true,
+                    checkProductAssets:true,
+                },
+                productRate:{
+                    required: true,
+                    checkProductRate:true,
+                    maxlength:4
+                }
+            },
+            messages: {
+                customerNum: {
+                    required: icon + "请输入客户手机号码",
+                    isPhone: icon + "客户手机号码格式不正确",
+                },
+                productAssets: {
+                    required: icon + "请输入套餐金额",
+                },
+                productRate:{
+                    required: icon + "请输入返点折扣",
+                    maxlength:icon+ "只能输入两位小数"
+                }
+            }
+        });
+
+        //自定义校验方式
+        $.validator.addMethod("checkProductAssets",function(value,element,params){
+            var checkProductAssets = /^((0{1}\.\d{1,2})|([1-9]\d*\.{1}\d{1,2})|([1-9]+\d*)|0)$/;
+            return this.optional(element)||(checkProductAssets.test(value));    // checkProductAssets:"输入金额必须为正数,包括0"
+        },"*套餐金额格式不正确！");
+
+        $.validator.addMethod("checkProductRate",function(value,element,params){
+            var checkProductRate = /^(0(\.\d{1,2})?|1(\.0{1,2})?)$/;    //0-1之间的两位小数(包含0,1)
+            return this.optional(element)||(checkProductRate.test(value));
+        },"*返点折扣格式不正确！");
+
+
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                $.operate.save(prefix + "/add", $('#form-businessUser-add').serialize());
+            }
+        }
+
+        $("input[name='orderTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true,
+            todayBtn: true
+        });
+
+        $("input[name='callTime']").datetimepicker({
+            format: "yyyy-mm-dd",
+            minView: "month",
+            autoclose: true,
+            todayBtn: true
+        });
+    </script>
+</body>
+</html>

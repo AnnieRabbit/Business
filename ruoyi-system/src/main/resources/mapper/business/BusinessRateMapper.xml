@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.BusinessRateMapper">
+    
+    <resultMap type="BusinessRate" id="BusinessRateResult">
+        <result property="id"    column="id"    />
+        <result property="membership"    column="membership"    />
+        <result property="memberRate"    column="member_rate"    />
+    </resultMap>
+
+    <sql id="selectBusinessRateVo">
+        select id, membership, member_rate from business_rate
+    </sql>
+
+    <select id="selectBusinessRateList" parameterType="BusinessRate" resultMap="BusinessRateResult">
+        <include refid="selectBusinessRateVo"/>
+        <where>  
+            <if test="membership != null  and membership != ''"> and membership like concat('%', #{membership}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectBusinessRateById" parameterType="Long" resultMap="BusinessRateResult">
+        <include refid="selectBusinessRateVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertBusinessRate" parameterType="BusinessRate" useGeneratedKeys="true" keyProperty="id">
+        insert into business_rate
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="membership != null">membership,</if>
+            <if test="memberRate != null">member_rate,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="membership != null">#{membership},</if>
+            <if test="memberRate != null">#{memberRate},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBusinessRate" parameterType="BusinessRate">
+        update business_rate
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="membership != null">membership = #{membership},</if>
+            <if test="memberRate != null">member_rate = #{memberRate},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBusinessRateById" parameterType="Long">
+        delete from business_rate where id = #{id}
+    </delete>
+
+    <delete id="deleteBusinessRateByIds" parameterType="String">
+        delete from business_rate where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+<!--查询集团返点率-->
+    <select id="selectMemberRate"  resultType="String">
+       select member_rate from business_rate where membership= #{membership}
+    </select>
+
+<!--是否已存在-->
+    <select id="selectMemberRateIfExist"  resultType="integer">
+       select count(0) from business_rate where membership= #{membership}
+    </select>
+
+    <!--导出列表-->
+    <select id="selectExportBusinessRateList" parameterType="BusinessRate" resultMap="BusinessRateResult">
+        <include refid="selectBusinessRateVo"/>
+    </select>
+
+    </mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.BusinessReturnMapper">
+    
+    <resultMap type="BusinessReturn" id="BusinessReturnResult">
+        <result property="id"    column="id"    />
+        <result property="customerNum"    column="customer_num"    />
+        <result property="returnType"    column="return_type"    />
+        <result property="returnAssets"    column="return_assets"    />
+        <result property="returnDate"    column="return_date"    />
+        <result property="orderTime"    column="order_time"    />
+        <result property="productId"    column="product_id"    />
+        <association property="businessUser" javaType="BusinessUser">
+            <result  property="developeNum" column="develope_num"/>
+            <result  property="productName" column="product_name"/>
+            <result property="membership" column="membership"  />
+        </association>
+    </resultMap>
+
+    <sql id="selectBusinessReturnVo">
+<!--        select id, customer_num, return_type, return_assets,return_date,order_time,product_id from business_return-->
+        select b.id, b.customer_num, b.return_type, b.return_assets, b.return_date,b.order_time , b.product_id,a.develope_num,a.product_name,a.membership from business_return b
+        left join business_user a on b.customer_num=a.customer_num  and a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </sql>
+
+    <select id="selectBusinessReturnList" parameterType="BusinessReturn" resultMap="BusinessReturnResult">
+        select b.id, b.customer_num, b.return_type, b.return_assets, b.return_date,b.order_time , b.product_id,a.develope_num,a.product_name,a.membership from business_return b
+        left join business_user a on b.customer_num=a.customer_num
+        <where>  
+            <if test="customerNum != null  and customerNum != ''"> and b.customer_num = #{customerNum}</if>
+            <if test="returnType != null  and returnType != ''"> and return_type = #{returnType}</if>
+            <if test="businessUser.developeNum != null  and businessUser.developeNum != ''"> and a.develope_num = #{businessUser.developeNum}</if>
+            <if test="returnDate != null and returnDate != ''"> and return_date = #{returnDate}</if>
+        </where>
+        and a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </select>
+    
+    <select id="selectBusinessReturnById" parameterType="Long" resultMap="BusinessReturnResult">
+        <include refid="selectBusinessReturnVo"/>
+        where b.id = #{id}
+    </select>
+
+    <select id="selectReturnTotal"  resultType="double">
+      select CASE WHEN(select round(sum(b.return_assets),2)from business_return b
+     left join business_user a on a.customer_num=b.customer_num
+     where  b.return_date =DATE_FORMAT(#{inputDate},'%Y-%m')
+     and a.develope_num=#{developeNum}
+     and a.order_time=b.order_time
+     and a.product_id=b.product_id)is null THEN 0
+        ELSE (select round(sum(b.return_assets),2) from business_return b
+     left join business_user a on a.customer_num=b.customer_num
+     where  b.return_date =DATE_FORMAT(#{inputDate},'%Y-%m')
+     and a.develope_num=#{developeNum}
+     and a.order_time=b.order_time
+     and a.product_id=b.product_id )
+        END
+     </select>
+
+    <insert id="insertBusinessReturn" parameterType="BusinessReturn" useGeneratedKeys="true" keyProperty="id">
+        insert into business_return
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerNum != null">customer_num,</if>
+            <if test="returnType != null">return_type,</if>
+            <if test="returnAssets != null">return_assets,</if>
+            <if test="returnDate != null">return_date,</if>
+            <if test="orderTime != null">order_time,</if>
+            <if test="productId != null">product_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerNum != null">#{customerNum},</if>
+            <if test="returnType != null">#{returnType},</if>
+            <if test="returnAssets != null">#{returnAssets},</if>
+            <if test="returnDate != null">#{returnDate},</if>
+            <if test="orderTime != null">#{orderTime},</if>
+            <if test="productId != null">#{productId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBusinessReturn" parameterType="BusinessReturn">
+        update business_return
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerNum != null">customer_num = #{customerNum},</if>
+            <if test="returnType != null">return_type = #{returnType},</if>
+            <if test="returnAssets != null">return_assets = #{returnAssets},</if>
+            <if test="returnDate != null">return_date = #{returnDate},</if>
+            <if test="orderTime != null">order_time = #{orderTime},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBusinessReturnById" parameterType="Long">
+        delete from business_return where id = #{id}
+    </delete>
+
+    <delete id="deleteBusinessReturnByIds" parameterType="String">
+        delete from business_return where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectExportBusinessReturnList" parameterType="BusinessReturn" resultMap="BusinessReturnResult">
+        select b.id, b.customer_num, b.return_type, b.return_assets, b.return_date,b.order_time , b.product_id,a.develope_num,a.product_name,a.membership from business_return b
+        left join business_user a on b.customer_num=a.customer_num
+        where a.order_time=b.order_time
+        and a.product_id=b.product_id
+    </select>
+
+    <!--    是否已存在此此客户订单的投诉退款数(查询条件:客户手机,产品,订购时间)-->
+    <select id="selectCountsBusinessReturn" resultType="integer">
+        select count(0) from business_return
+        where customer_num = #{customerNum} and product_id= #{productId} and order_time= #{orderTime}
+    </select>
+
+</mapper>
