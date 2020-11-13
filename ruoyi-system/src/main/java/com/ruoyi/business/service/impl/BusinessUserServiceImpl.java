@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -114,9 +115,9 @@ public class BusinessUserServiceImpl implements IBusinessUserService
     @Override
     public int deleteBusinessUserById(Long id)
     {
-        System.out.print(id);
+
         BusinessUser businessUser=businessUserMapper.selectBusinessUserById(id);
-        System.out.print(businessUser);
+
         int a=businessReceiptsMapper.selectCountsBusinessReceipts(businessUser.getCustomerNum(),businessUser.getProductId(),businessUser.getOrderTime());
         int b=businessReceivableMapper.selectCountsBusinessReceivable(businessUser.getCustomerNum(),businessUser.getProductId(),businessUser.getOrderTime());
         int c=businessReturnMapper.selectCountsBusinessReturn(businessUser.getCustomerNum(),businessUser.getProductId(),businessUser.getOrderTime());
@@ -191,6 +192,8 @@ public class BusinessUserServiceImpl implements IBusinessUserService
         return this.selectBusinessUserIfExists(businessUser);
     }
 
+
+    //导出客户订单的excel处理
     @Override
     public List<List<String>> changeExcel(List<BusinessUser> lists) {
         List<List<String>> excelData = new ArrayList<List<String>>();
@@ -228,12 +231,67 @@ public class BusinessUserServiceImpl implements IBusinessUserService
         return excelData;
     }
 
+
+    //导出客户的list集合
     @Override
     public List<BusinessUser> selectExportBusinessUserList(BusinessUser businessUser) {
         return businessUserMapper.selectExportBusinessUserList(businessUser);
     }
 
+
+    //根据所选日期查询所有发展人账单
+    @Override
+    public List<BusinessUser> countList(String inputDate, String developeNum) {
+        List<BusinessUser>  lists=businessUserMapper.countList(inputDate,developeNum);
+        DecimalFormat df = new DecimalFormat("#.00");
+        for(BusinessUser list:lists){
+
+            if("".equals( list.getAdvance())|| list.getAdvance()==null){
+                list.setAdvance(Double.valueOf(0));
+            }
+            if("".equals( list.getClear())|| list.getClear()==null){
+                list.setClear(Double.valueOf(0));
+            }
+            if("".equals( list.getReturns())|| list.getReturns()==null){
+                list.setReturns(Double.valueOf(0));
+            }
+
+            Double totalPay=list.getAdvance()+list.getClear()-list.getReturns();
+            list.setTotal(Double.valueOf(df.format(totalPay)));
+            list.setInputDate(inputDate.substring(0,inputDate.lastIndexOf("-")));
+        }
+
+        return lists;
+    }
+
+    @Override
+    public List<List<String>> changeExcelDevelope(List<BusinessUser> lists) {
+        List<List<String>> excelData = new ArrayList<List<String>>();
+        List<String> head = new ArrayList<>();
+        head.add("发展人");
+        head.add("预付");
+        head.add("清缴");
+        head.add("退款");
+        head.add("总计");
+        head.add("账单时间");
+        excelData.add(head);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        for (int i = 0; i < lists.size(); i++) {
+            List<String> data = new ArrayList<>();
+            data.add(lists.get(i).getDevelopeNum().equals("")?"":lists.get(i).getDevelopeNum());
+            data.add(lists.get(i).getAdvance().toString().equals("")?"0":lists.get(i).getAdvance().toString());
+            data.add(lists.get(i).getClear().toString().equals("")?"0":lists.get(i).getClear().toString());
+            data.add(lists.get(i).getReturns().toString().equals("")?"0":lists.get(i).getReturns().toString());
+            data.add(lists.get(i).getTotal().toString().equals("")?"0":lists.get(i).getTotal().toString());
+            data.add(lists.get(i).getInputDate().equals("")?"":lists.get(i).getInputDate());
+            excelData.add(data);
+        }
+        return excelData;
+    }
+
+
     /****
+     * 导入客户订单
      * @param object 对象
      * @return 如果对象不为空，且没有空值。返回true，对象为空或者有空值，返回false
      * */

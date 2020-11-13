@@ -57,20 +57,6 @@ public class BusinessReceivableController extends BaseController
         return getDataTable(list);
     }
 
-//    /**
-//     * 导出应收账单列表
-//     */
-//    @RequiresPermissions("business:businessReceivable:export")
-//    @Log(title = "应收账单", businessType = BusinessType.EXPORT)
-//    @PostMapping("/export")
-//    @ResponseBody
-//    public AjaxResult export(BusinessReceivable businessReceivable)
-//    {
-//        List<BusinessReceivable> list = businessReceivableService.selectBusinessReceivableList(businessReceivable);
-//        ExcelUtil<BusinessReceivable> util = new ExcelUtil<BusinessReceivable>(BusinessReceivable.class);
-//        return util.exportExcel(list, "businessReceivable");
-//    }
-
 
     /**
      * 导出应收账单

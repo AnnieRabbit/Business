@@ -75,4 +75,7 @@ public interface BusinessUserMapper
 
     //导出list
     public List<BusinessUser> selectExportBusinessUserList(BusinessUser businessUser);
+
+    //计算
+    public List<BusinessUser> countList(@Param("inputDate")String inputDate,@Param("developeNum")String developeNum);
 }

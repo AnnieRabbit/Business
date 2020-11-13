@@ -76,28 +76,30 @@ public interface IBusinessUserService
 
 
     /**
-     * 导出全部excel操作excel
+     * 导出客户订单全部excel操作excel
      * @param lists
      * @return
      */
     List<List<String>> changeExcel(List<BusinessUser> lists);
 
     /**
-     * 导出全部数据
+     * 导出客户订单全部数据
      * @param
      * @return
      */
     public List<BusinessUser> selectExportBusinessUserList(BusinessUser businessUser);
 
+    /**
+     * 发展人列表
+     */
+    public List<BusinessUser> countList(String inputDate,String developeNum);
 
 
-//    //判断石否存在此客户订单
-//    private int ifExistUser(String customerNum, Date orderTime, String productId){
-//        BusinessUser businessUser=new BusinessUser();
-//        businessUser.setCustomerNum(customerNum);
-//        businessUser.setOrderTime(orderTime);
-//        businessUser.setProductId(productId);
-//        int a= businessUserMapper.selectBusinessUserIfExists(businessUser);
-//        return a;
-//    }
+    /**
+     * 导出发展人订单
+     * @param lists
+     * @return
+     */
+    List<List<String>> changeExcelDevelope(List<BusinessUser> lists);
+
 }

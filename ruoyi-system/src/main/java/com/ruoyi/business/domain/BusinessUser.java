@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
@@ -67,6 +68,30 @@ public class BusinessUser extends BaseEntity
     /** 返点比例 */
     @Excel(name = "返点比例")
     private String productRate;
+
+    /** 预付 */
+//    @Excel(name = "预付")
+    private Double advance;
+
+    /** 清缴 */
+//    @Excel(name = "清缴")
+    private Double clear;
+
+    /** 退费*/
+//    @Excel(name = "退费")
+    private Double returns;
+
+    /** 总额*/
+//    @Excel(name = "总额")
+    private Double total;
+
+
+
+
+    /** 账单时间 */
+    private String inputDate;
+
+
 
     public void setId(Long id) 
     {
@@ -185,6 +210,47 @@ public class BusinessUser extends BaseEntity
     {
         return productRate;
     }
+    public Double getAdvance() {
+
+        return advance;
+    }
+
+    public void setAdvance(Double advance) {
+        this.advance = advance;
+    }
+
+    public Double getClear() {
+        return clear;
+    }
+
+    public void setClear(Double clear) {
+        this.clear = clear;
+    }
+
+    public Double getReturns() {
+
+        return returns;
+    }
+
+    public void setReturns(Double returns) {
+        this.returns = returns;
+    }
+
+    public Double getTotal() {
+        return total;
+    }
+
+    public void setTotal(Double total) {
+        this.total = total;
+    }
+
+    public String getInputDate() {
+        return inputDate;
+    }
+
+    public void setInputDate(String inputDate) {
+        this.inputDate = inputDate;
+    }
 
     @Override
     public String toString() {
@@ -202,6 +268,11 @@ public class BusinessUser extends BaseEntity
             .append("callTime", getCallTime())
             .append("productAssets", getProductAssets())
             .append("productRate", getProductRate())
+            .append("advance", getAdvance())
+            .append("clear", getClear())
+            .append("returns", getReturns())
+            .append("total", getTotal())
+            .append("inputDate", getInputDate())
             .toString();
     }
 }

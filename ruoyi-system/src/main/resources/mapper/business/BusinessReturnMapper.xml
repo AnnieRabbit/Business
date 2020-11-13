@@ -27,16 +27,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <select id="selectBusinessReturnList" parameterType="BusinessReturn" resultMap="BusinessReturnResult">
-        select b.id, b.customer_num, b.return_type, b.return_assets, b.return_date,b.order_time , b.product_id,a.develope_num,a.product_name,a.membership from business_return b
-        left join business_user a on b.customer_num=a.customer_num
+        <include refid="selectBusinessReturnVo"/>
         <where>  
             <if test="customerNum != null  and customerNum != ''"> and b.customer_num = #{customerNum}</if>
             <if test="returnType != null  and returnType != ''"> and return_type = #{returnType}</if>
             <if test="businessUser.developeNum != null  and businessUser.developeNum != ''"> and a.develope_num = #{businessUser.developeNum}</if>
             <if test="returnDate != null and returnDate != ''"> and return_date = #{returnDate}</if>
         </where>
-        and a.order_time=b.order_time
-        and a.product_id=b.product_id
+
     </select>
     
     <select id="selectBusinessReturnById" parameterType="Long" resultMap="BusinessReturnResult">
@@ -105,10 +103,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <select id="selectExportBusinessReturnList" parameterType="BusinessReturn" resultMap="BusinessReturnResult">
-        select b.id, b.customer_num, b.return_type, b.return_assets, b.return_date,b.order_time , b.product_id,a.develope_num,a.product_name,a.membership from business_return b
-        left join business_user a on b.customer_num=a.customer_num
-        where a.order_time=b.order_time
-        and a.product_id=b.product_id
+        <include refid="selectBusinessReturnVo"/>
     </select>
 
     <!--    是否已存在此此客户订单的投诉退款数(查询条件:客户手机,产品,订购时间)-->
