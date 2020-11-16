@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('发展人列表')" />
+    <th:block th:include="include :: datetimepicker-css" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <label>选择日期：</label>
+                                <input type="text" name="inputDate" id="inputDate" placeholder="yyyy-MM"  class="form-control" style="display:inline-block;" readonly/>
+                            </li>
+                            <li>
+                                <label>发展人：</label>
+                                <input type="text" name="developeNum" id="developeNum"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" id="refresh"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-warning" id="export" shiro:hasPermission="business:businessDevelope:export">
+                    <i class="fa fa-download"></i> 导出
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+     <th:block th:include="include :: datetimepicker-js" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('business:businessUser:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:businessUser:remove')}]];
+        var prefix = ctx + "business/businessDevelope";
+
+
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                exportUrl: prefix + "/export/{inputDate}",
+                modalName: "账单总览",
+                columns: [{
+                    checkbox: false
+                },
+                {
+                    field: 'id',
+                    title: '自增id',
+                    visible: false
+                },
+                {
+                    field: 'developeNum',
+                    title: '发展人'
+                },
+                {
+                    field: 'advance',
+                    title: '预付'
+                },
+                {
+                    field: 'clear',
+                    title: '清缴'
+                },
+                {
+                    field: 'returns',
+                    title: '退款'
+                },
+                {
+                    field: 'total',
+                    title: '总计'
+                }]
+            };
+            $.table.init(options);
+
+            var inputDate="";
+            //初始化
+            $("#inputDate").datetimepicker({
+                format: 'yyyy-mm',
+                autoclose: true,
+                todayBtn: true,
+                todayHighlight: true,
+                startView: 'year',
+                minView:'year',
+                maxView:'year',
+            });
+
+            //当前日期
+            var d = new Date();
+            var y = d.getFullYear();
+            var m = d.getMonth() +1;
+            var nowDate = y + '-' + m;
+
+            if (m >= 1 && m <= 9) {
+                m = "0" + m;
+            }
+            var currentdate = y + '-'+ m;
+
+            $('#inputDate').val(currentdate)
+                .datetimepicker({
+                    format: 'yyyy-mm',
+                }).on('change',function(){
+                inputDate=  $(this).val()
+            });
+
+            $("#export").click(function () {
+                window.location = prefix+'/export/'+inputDate;
+            })
+            $("#refresh").click(function () {
+                window.location.reload();
+            })
+        });
+    </script>
+</body>
+<script id="importTpl" type="text/template">
+</script>
+</html>
