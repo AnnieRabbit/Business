@@ -20,7 +20,11 @@
                                 <input type="text" name="developeNum" id="developeNum"/>
                             </li>
                             <li>
-                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <label>系数：</label>
+                                <input type="text" name="inputRate" id="inputRate"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="tablesearch()"><i class="fa fa-search"></i>&nbsp;搜索</a>
                                 <a class="btn btn-warning btn-rounded btn-sm" id="refresh"><i class="fa fa-refresh"></i>&nbsp;重置</a>
                             </li>
                         </ul>
@@ -30,7 +34,7 @@
 
             <div class="btn-group-sm" id="toolbar" role="group">
                 <a class="btn btn-warning" id="export" shiro:hasPermission="business:businessDevelope:export">
-                    <i class="fa fa-download"></i> 导出
+                    <i class="fa fa-download"></i> 导出所有
                 </a>
             </div>
             <div class="col-sm-12 select-table table-striped">
@@ -44,45 +48,16 @@
         var editFlag = [[${@permission.hasPermi('business:businessUser:edit')}]];
         var removeFlag = [[${@permission.hasPermi('business:businessUser:remove')}]];
         var prefix = ctx + "business/businessDevelope";
+        var icon = "<i class='fa fa-times-circle'></i> ";
 
-
+        function tablesearch() {
+            if ($.validate.form()) {
+                $.table.search();
+            }
+        }
 
         $(function() {
-            var options = {
-                url: prefix + "/list",
-                exportUrl: prefix + "/export/{inputDate}",
-                modalName: "账单总览",
-                columns: [{
-                    checkbox: false
-                },
-                {
-                    field: 'id',
-                    title: '自增id',
-                    visible: false
-                },
-                {
-                    field: 'developeNum',
-                    title: '发展人'
-                },
-                {
-                    field: 'advance',
-                    title: '预付'
-                },
-                {
-                    field: 'clear',
-                    title: '清缴'
-                },
-                {
-                    field: 'returns',
-                    title: '退款'
-                },
-                {
-                    field: 'total',
-                    title: '总计'
-                }]
-            };
-            $.table.init(options);
-
+            $("#inputRate").val(1);
             var inputDate="";
             //初始化
             $("#inputDate").datetimepicker({
@@ -106,20 +81,84 @@
             }
             var currentdate = y + '-'+ m;
 
-            $('#inputDate').val(currentdate)
-                .datetimepicker({
-                    format: 'yyyy-mm',
-                }).on('change',function(){
+            $('#inputDate').val(currentdate).datetimepicker({
+                format: 'yyyy-mm',
+            }).on('change',function(){
                 inputDate=  $(this).val()
             });
 
+            var options = {
+                url: prefix + "/list",
+                exportUrl: prefix + "/export/{inputDate}",
+                modalName: "账单总览",
+                columns: [{
+                    checkbox: false
+                },
+                {
+                    field: 'id',
+                    title: '自增id',
+                    visible: false
+                },
+                {
+                    field: 'developeNum',
+                    title: '发展人'
+                },
+                // {
+                //     field: 'advance',
+                //     title: '预付'
+                // },
+                {
+                    field: 'clear',
+                    title: '清缴'
+                },
+                {
+                    field: 'returns',
+                    title: '退款'
+                },
+                {
+                    field: 'total',
+                    title: '总计'
+                }]
+            };
+            $.table.init(options);
+            $.table.search();
+
+
             $("#export").click(function () {
-                window.location = prefix+'/export/'+inputDate;
+
+               var thisDate= $("#inputDate").val();
+                var rate= $("#inputRate").val();
+                window.location = prefix+'/export/'+thisDate+'/'+rate;
             })
             $("#refresh").click(function () {
                 window.location.reload();
             })
         });
+
+        $("#formId").validate({
+            focusCleanup: true,
+            rules: {
+                inputRate:{
+                    required: true,
+                    checkInputRate:true,
+                    maxlength:4
+                }
+            },
+            messages: {
+                inputRate:{
+                    required: icon + "请输入系数",
+                    maxlength:icon+ "只能输入两位小数"
+                }
+            }
+        });
+
+        //自定义校验方式
+        $.validator.addMethod("checkInputRate",function(value,element,params){
+            var checkInputRate = /^(0(\.\d{1,2})?|1(\.0{1,2})?)$/;    //0-1之间的两位小数(包含0,1)
+            return this.optional(element)||(checkInputRate.test(value));
+        },"系数格式不正确！");
+
+
     </script>
 </body>
 <script id="importTpl" type="text/template">

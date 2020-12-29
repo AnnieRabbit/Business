@@ -85,7 +85,8 @@ public class BusinessUser extends BaseEntity
 //    @Excel(name = "总额")
     private Double total;
 
-
+    /** 输入因数 */
+    private Double inputRate;
 
 
     /** 账单时间 */
@@ -250,6 +251,14 @@ public class BusinessUser extends BaseEntity
 
     public void setInputDate(String inputDate) {
         this.inputDate = inputDate;
+    }
+
+    public Double getInputRate() {
+        return inputRate;
+    }
+
+    public void setInputRate(Double inputRate) {
+        this.inputRate = inputRate;
     }
 
     @Override

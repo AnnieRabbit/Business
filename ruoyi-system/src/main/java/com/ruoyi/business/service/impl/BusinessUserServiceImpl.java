@@ -241,23 +241,30 @@ public class BusinessUserServiceImpl implements IBusinessUserService
 
     //根据所选日期查询所有发展人账单
     @Override
-    public List<BusinessUser> countList(String inputDate, String developeNum) {
+    public List<BusinessUser> countList(String inputDate, String developeNum, Double inputRate) {
         List<BusinessUser>  lists=businessUserMapper.countList(inputDate,developeNum);
         DecimalFormat df = new DecimalFormat("#.00");
         for(BusinessUser list:lists){
 
-            if("".equals( list.getAdvance())|| list.getAdvance()==null){
-                list.setAdvance(Double.valueOf(0));
-            }
+//            if("".equals( list.getAdvance())|| list.getAdvance()==null){
+//                list.setAdvance(Double.valueOf(0));
+//            }
             if("".equals( list.getClear())|| list.getClear()==null){
                 list.setClear(Double.valueOf(0));
             }
             if("".equals( list.getReturns())|| list.getReturns()==null){
                 list.setReturns(Double.valueOf(0));
             }
+            list.setInputDate(inputDate);
+            list.setInputRate(inputRate);
 
-            Double totalPay=list.getAdvance()+list.getClear()-list.getReturns();
+            //往前三个月预付clear*inputRate-退款
+            Double totalPay=list.getClear()*inputRate-list.getReturns();
+
+            //往前四个月清缴advance*inputRate-退款
+            //  Double totalPay=list.getAdvance()*inputRate-list.getReturns();
             list.setTotal(Double.valueOf(df.format(totalPay)));
+
             list.setInputDate(inputDate.substring(0,inputDate.lastIndexOf("-")));
         }
 
@@ -269,8 +276,10 @@ public class BusinessUserServiceImpl implements IBusinessUserService
         List<List<String>> excelData = new ArrayList<List<String>>();
         List<String> head = new ArrayList<>();
         head.add("发展人");
-        head.add("预付");
-        head.add("清缴");
+//        head.add("预付");
+//        head.add("清缴");
+        head.add("实收");
+        head.add("系数");
         head.add("退款");
         head.add("总计");
         head.add("账单时间");
@@ -279,11 +288,12 @@ public class BusinessUserServiceImpl implements IBusinessUserService
         for (int i = 0; i < lists.size(); i++) {
             List<String> data = new ArrayList<>();
             data.add(lists.get(i).getDevelopeNum().equals("")?"":lists.get(i).getDevelopeNum());
-            data.add(lists.get(i).getAdvance().toString().equals("")?"0":lists.get(i).getAdvance().toString());
+//            data.add(lists.get(i).getAdvance().toString().equals("")?"0":lists.get(i).getAdvance().toString());
             data.add(lists.get(i).getClear().toString().equals("")?"0":lists.get(i).getClear().toString());
+            data.add(lists.get(i).getInputRate().toString().equals("")?"1":lists.get(i).getInputRate().toString());
             data.add(lists.get(i).getReturns().toString().equals("")?"0":lists.get(i).getReturns().toString());
             data.add(lists.get(i).getTotal().toString().equals("")?"0":lists.get(i).getTotal().toString());
-            data.add(lists.get(i).getInputDate().equals("")?"":lists.get(i).getInputDate());
+            data.add(lists.get(i).getInputDate().toString().equals("")?"":lists.get(i).getInputDate().toString());
             excelData.add(data);
         }
         return excelData;

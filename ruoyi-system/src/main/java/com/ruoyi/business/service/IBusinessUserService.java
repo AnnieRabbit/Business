@@ -92,7 +92,7 @@ public interface IBusinessUserService
     /**
      * 发展人列表
      */
-    public List<BusinessUser> countList(String inputDate,String developeNum);
+    public List<BusinessUser> countList(String inputDate,String developeNum, Double inputRate);
 
 
     /**

@@ -52,30 +52,37 @@ public class BusinessDevelopeController extends BaseController
     @RequiresPermissions("business:businessDevelope:list")
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list( String inputDate, String developeNum)
+    public TableDataInfo list( String inputDate, String developeNum,Double inputRate)
     {
+        if(inputRate==null||inputRate.toString().trim().length()==0){
+            inputRate=1.00;
+        }
+
         String convert=inputDate+"-01";
         startPage();
-        List<BusinessUser> list = businessUserService.countList(convert,developeNum);
+        List<BusinessUser> list = businessUserService.countList(convert,developeNum,inputRate);
         return getDataTable(list);
     }
 
 
     /**
      * 导出发展人账单(按日期)
+     * param   inputDate  输入日期
+     * param   输入因数
      */
     @RequiresPermissions("business:businessDevelope:export")
     @Log(title = "发展人账单总览", businessType = BusinessType.EXPORT)
-    @GetMapping("/export/{inputDate}")
+    @GetMapping("/export/{inputDate}/{inputRate}")
     @ResponseBody
-    public void exportLog(HttpServletResponse response,@PathVariable("inputDate") String inputDate, String developeNum) throws IOException {
+    public void exportLog(HttpServletResponse response,@PathVariable("inputDate") String inputDate, String developeNum,@PathVariable("inputRate")Double inputRate) throws IOException {
         String convert=inputDate+"-01";
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, Object> params = new HashMap<>();
 
+
         String sheetName = "发展人账单总览";
         String fileName = "发展人账单总览_" + sdf.format(new Date()) + ".xls";
-        List<BusinessUser> lists = businessUserService.countList(convert,developeNum);
+        List<BusinessUser> lists = businessUserService.countList(convert,developeNum,inputRate);
         List<List<String>> excelData = businessUserService.changeExcelDevelope(lists);
         ExcelUtil.exportExcel(response, excelData, sheetName, fileName, 15);
     }

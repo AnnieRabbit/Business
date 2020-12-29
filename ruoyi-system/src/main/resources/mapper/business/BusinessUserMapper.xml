@@ -130,51 +130,88 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
 
+<!--    <select id="countList" resultMap="BusinessUserResult">-->
+<!--SELECT-->
+<!--	u.develope_num,-->
+<!--	(SELECT-->
+<!--	round(sum(a.product_assets*b.real_rate),2)-->
+<!--FROM-->
+<!--	business_user a-->
+<!--	LEFT JOIN business_receipts b ON a.customer_num = b.customer_num-->
+<!--	AND a.order_time = b.order_time-->
+<!--	AND a.product_id = b.product_id-->
+<!--WHERE-->
+<!--	develope_num = u.develope_num-->
+<!--	and DATE_FORMAT(b.bill_date,'%Y-%m') =DATE_FORMAT(date_sub(#{inputDate}, interval 4 month),'%Y-%m')-->
+<!--  and  TIMESTAMPDIFF(MONTH,a.order_time,DATE_FORMAT(#{inputDate}, '%Y-%m-%d')) between 0 and 12 ) as advance,-->
+<!--	(SELECT-->
+<!--	round(sum(a.product_assets*b.real_rate),2)-->
+<!--FROM-->
+<!--	business_user a-->
+<!--	LEFT JOIN business_receipts b ON a.customer_num = b.customer_num-->
+<!--	AND a.order_time = b.order_time-->
+<!--	AND a.product_id = b.product_id-->
+<!--WHERE-->
+<!--	develope_num = u.develope_num-->
+<!--	and DATE_FORMAT(b.bill_date,'%Y-%m') =DATE_FORMAT(date_sub(#{inputDate}, interval 3 month),'%Y-%m')-->
+<!--  and  TIMESTAMPDIFF(MONTH,a.order_time,DATE_FORMAT(#{inputDate}, '%Y-%m-%d')) between 0 and 12 ) as clear,-->
+
+<!--	(-->
+<!--	SELECT-->
+<!--	round(sum(b.return_assets),2)-->
+<!--FROM-->
+<!--	business_user a-->
+<!--	LEFT JOIN business_return b ON a.customer_num = b.customer_num-->
+<!--	AND a.order_time = b.order_time-->
+<!--	AND a.product_id = b.product_id-->
+<!--WHERE-->
+<!--  develope_num = u.develope_num and-->
+<!--	b.return_date =DATE_FORMAT(#{inputDate},'%Y-%m')-->
+<!-- ) as returns-->
+
+<!--FROM-->
+<!--	business_user u-->
+<!--	<where>-->
+<!--        <if test="developeNum != null  and developeNum != ''"> and develope_num = #{developeNum}</if>-->
+<!--    </where>-->
+<!--	group by u.develope_num-->
+
+<!--    </select>-->
+
     <select id="countList" resultMap="BusinessUserResult">
-SELECT
-	u.develope_num,
-	(SELECT
-	round(sum(a.product_assets*b.real_rate),2)
-FROM
-	business_user a
-	LEFT JOIN business_receipts b ON a.customer_num = b.customer_num
-	AND a.order_time = b.order_time
-	AND a.product_id = b.product_id
-WHERE
-	develope_num = u.develope_num
-	and DATE_FORMAT(b.bill_date,'%Y-%m') =DATE_FORMAT(date_sub(#{inputDate}, interval 4 month),'%Y-%m')
-  and  TIMESTAMPDIFF(MONTH,a.order_time,DATE_FORMAT(#{inputDate}, '%Y-%m-%d')) between 0 and 12 ) as advance,
-	(SELECT
-	round(sum(a.product_assets*b.real_rate),2)
-FROM
-	business_user a
-	LEFT JOIN business_receipts b ON a.customer_num = b.customer_num
-	AND a.order_time = b.order_time
-	AND a.product_id = b.product_id
-WHERE
-	develope_num = u.develope_num
-	and DATE_FORMAT(b.bill_date,'%Y-%m') =DATE_FORMAT(date_sub(#{inputDate}, interval 3 month),'%Y-%m')
-  and  TIMESTAMPDIFF(MONTH,a.order_time,DATE_FORMAT(#{inputDate}, '%Y-%m-%d')) between 0 and 12 ) as clear,
+        SELECT
+        u.develope_num,
+        (SELECT
+        round(sum(a.product_assets*b.real_rate),2)
+        FROM
+        business_user a
+        LEFT JOIN business_receipts b ON a.customer_num = b.customer_num
+        AND a.order_time = b.order_time
+        AND a.product_id = b.product_id
+        WHERE
+        develope_num = u.develope_num
+        and DATE_FORMAT(b.bill_date,'%Y-%m') =DATE_FORMAT(date_sub(#{inputDate}, interval 3 month),'%Y-%m')
+        and  TIMESTAMPDIFF(MONTH,a.order_time,DATE_FORMAT(#{inputDate}, '%Y-%m-%d')) between 0 and 12 ) as clear,
 
-	(
-	SELECT
-	round(sum(b.return_assets),2)
-FROM
-	business_user a
-	LEFT JOIN business_return b ON a.customer_num = b.customer_num
-	AND a.order_time = b.order_time
-	AND a.product_id = b.product_id
-WHERE
-  develope_num = u.develope_num and
-	b.return_date =DATE_FORMAT(#{inputDate},'%Y-%m')
- ) as returns
+        (
+        SELECT
+        round(sum(b.return_assets),2)
+        FROM
+        business_user a
+        LEFT JOIN business_return b ON a.customer_num = b.customer_num
+        AND a.order_time = b.order_time
+        AND a.product_id = b.product_id
+        WHERE
+        develope_num = u.develope_num and
+        b.return_date =DATE_FORMAT(#{inputDate},'%Y-%m')
+        ) as returns
 
-FROM
-	business_user u
-	<where>
-        <if test="developeNum != null  and developeNum != ''"> and develope_num = #{developeNum}</if>
-    </where>
-	group by u.develope_num
+        FROM
+        business_user u
+        <where>
+            <if test="developeNum != null  and developeNum != ''"> and develope_num = #{developeNum}</if>
+        </where>
+        group by u.develope_num
 
     </select>
 
